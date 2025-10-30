@@ -39,9 +39,10 @@ type Panel struct {
 	SelectFocus    int
 	//PreviousFocus  int
 	Rect           bool
+	ExitKey        []string
 	styleMatrix    [][]string
 	doc            string
-	ExitKey        []string
+	help           string
 }
 
 type ListField struct {
@@ -222,13 +223,13 @@ func LineRect(sx, sy, ex, ey int, style tcell.Style) {
 // ---------------------------------------------
 // Panel
 // ---------------------------------------------
-func NewPanel(doc string, styleMatrix [][]string) *Panel {
+func NewPanel(doc string, styleMatrix [][]string, help string) *Panel {
 	var p Panel
 	err := toml.Unmarshal([]byte(doc), &p)
 	if err != nil {
 		panic(err)
 	}
-	p.setFieldStyle(doc, styleMatrix)
+	p.setFieldStyle(doc, styleMatrix, help)
 	return &p
 }
 
@@ -246,7 +247,7 @@ func ModifyPanelPosition(base *Panel, startX, startY int) *Panel {
 	p.StartY = startY
 	//log.Printf("ModifyPanel p.StartX:%d p.StartY:%d p.EndX:%d p.EndY:%d\n",p.StartX, p.StartY, p.EndX, p.EndY)
 
-	p.setFieldStyle(base.doc, base.styleMatrix)
+	p.setFieldStyle(base.doc, base.styleMatrix, base.help)
 	return &p
 }
 
@@ -492,10 +493,11 @@ func (p *Panel) setListFieldStyle(i int, s0 tcell.Style, s1 tcell.Style) int {
 }
 
 
-func (p *Panel) setFieldStyle(doc string, styleMatrix [][]string) {
+func (p *Panel) setFieldStyle(doc string, styleMatrix [][]string, help string) {
 	i := 0
-	p.styleMatrix = styleMatrix
 	p.doc = doc
+	p.styleMatrix = styleMatrix
+	p.help = help
 
 	for {
 		if i >= len(p.Field) {
@@ -543,6 +545,11 @@ func (p *Panel) ResetFieldStyle(n, style string){
 	}
 
 }
+
+func (p *Panel) GetHelp() string{
+	return p.help
+}
+
 
 // ---------------------------------------------
 // Check field attribute
