@@ -846,7 +846,11 @@ func (p *Panel) SayListData(n string) {
 	listLen := p.getListLen(p.Field[pos].Name)
 
 	p.clearList(p.Field[pos].Name)
-
+	//@@@@
+	if isDisabled(p.Field[pos]){
+		return
+	}
+	
 	for i < pos+listLen {
 		if lines == 0 {
 			p.Field[i].Enabled()
