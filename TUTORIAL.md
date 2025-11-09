@@ -8,7 +8,7 @@ The programs that use **Taps**, specify the input panel using **TOML** format. L
 
 Assume you have an input screen like this:
 
-![INPUT](/imsges/input.png)
+![INPUT](/images/input.png)
 
 ### (1) Panel Definition
 
@@ -158,7 +158,7 @@ In the example above, the loop breaks if the "Escape" key is pressed or if field
 
  Let's explain the structure of the list format. This is generally called a ListBox and will be used when selecting data from a displayed list.
 
-![LIST](/imsges/list.png)
+![LIST](/images/list.png)
 
 The panel specifies a portion of the terminal. By specifying the number of *rows as **Rows = 12** for the selection item, a screen like the one above can be defined.
 
@@ -204,7 +204,7 @@ In this example, string array has been set.
 
 Next, let's look at a program with a slightly more complex structure: the so-called Calendar program.
 
-![GODATE](/imsges/godate.png)
+![GODATE](/images/godate.png)
 
 "**ExitKey**" is added to the panel definition.
 
@@ -248,7 +248,7 @@ Mouse selection
 ### (4) TestApp (examples/04_testapp/testapp.go)
  Finally, we present an application that combines the three programs discussed so far.
 
-![TESTAPP](/imsges/testapp.png)
+![TESTAPP](/images/testapp.png)
 
 This program performs the following processes:
 

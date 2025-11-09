@@ -5,7 +5,7 @@
 
 　下記のような入力画面があるとします。
 
-![INPUT](/imsges/input.png)
+![INPUT](/images/input.png)
 
 ### (1) パネルの定義
 　最初にフィールド属性定義がありますが、これは後述するとして、"**var doc**" 以下を見てください。
@@ -148,7 +148,7 @@ func  (m *Input) Run() {
 ## [2] リスト形式の例 (**examples/02_list/list.go**)
 　リスト形式の構造について説明します。一般にListBoxと呼ばれる形式で、リスト表示した一覧からデータを選択する際に利用されることになるでしょう。
 
-![LIST](/imsges/list.png)
+![LIST](/images/list.png)
 
 　パネルは、ターミナルの一部を指定します。また選択項目には、**Rows = 12** という行数を指定すれば、上記のような画面を定義できます。 
 
@@ -191,7 +191,7 @@ func (m *List) Run() string {
 ### (3) GoDate (**examples/03_godate/godate.go**)
 　次は少し複雑な構成のプログラムを見てみましょう。いわゆる **Calendar** プログラムです。
 
-![GODATE](/imsges/godate.png)
+![GODATE](/images/godate.png)
 
 パネル定義に "**ExitKey**" という設定を追加しています。
 
@@ -233,7 +233,7 @@ PFキー(F2からF8)
 ### (4) TestApp　(examples/04_testapp/testapp.go)
 　最後に、ここまでのプログラム3つを組み合わせたアプリケーションを示します。
 
-![TESTAPP](/imsges/testapp.png)
+![TESTAPP](/images/testapp.png)
 
 このプログラムでは、下記の処理を行います。
 
