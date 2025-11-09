@@ -37,7 +37,6 @@ type Panel struct {
 	StartX, StartY int
 	EndX, EndY     int
 	SelectFocus    int
-	//PreviousFocus  int
 	Rect           bool
 	ExitKey        []string
 	styleMatrix    [][]string
@@ -79,7 +78,6 @@ type DataField struct {
 	normalStyle  tcell.Style
 	focusedStyle tcell.Style
 	listStart    int
-	//listFocus      int
 	listData      []ListField
 	hMode         byte
 	hDataPos      int
@@ -550,7 +548,6 @@ func (p *Panel) GetHelp() string{
 	return p.help
 }
 
-
 // ---------------------------------------------
 // Check field attribute
 // ---------------------------------------------
@@ -583,7 +580,6 @@ func (f *DataField) Disabled() {
 
 func (f *DataField) Enabled() {
 	if f != nil {
-		//f.hMode = f.hMode & 0x3f
 		f.hMode = f.hMode & (0xff ^ DISABLED)
 	}
 }
@@ -621,12 +617,18 @@ func isListMode(f *DataField) bool {
 func (f *DataField) BrowseMode() {
 	if f != nil {
 		f.hMode = f.hMode | BROWSE_MODE
+		//@@@
+		/*
+		f.hDataPos = 0
+		f.hStartDataPos = 0
+		f.hCursorX = 0
+		f.hCursorY = 0
+		*/
 	}
 }
 
 func (f *DataField) EditMode() {
 	if f != nil {
-		//f.hMode = f.hMode & 0xfd
 		f.hMode = f.hMode & (0xff ^ BROWSE_MODE)
 	}
 }
@@ -639,12 +641,6 @@ func isBrowseMode(f *DataField) bool {
 }
 
 func (p *Panel) SetBrowseMode(n string, flag bool) {
-	/*
-	name := strings.Split(n, LIST_SEP)
-	if len(name) > 1{
-		n = strings.Split(n, LIST_SEP)[0] + LIST_SEP
-	}
-	*/
 	for _, f := range p.Field {
 		if strings.HasPrefix(f.Name, n) {
 			if flag{
@@ -850,7 +846,11 @@ func (p *Panel) SayListData(n string) {
 	if isDisabled(p.Field[pos]){
 		return
 	}
-	
+	if len(s.listData) == 0{
+		return
+	}
+	//
+
 	for i < pos+listLen {
 		if lines == 0 {
 			p.Field[i].Enabled()
@@ -2211,7 +2211,6 @@ func (p *Panel) read2(i int) (tcell.Key, string) {
 			if isEdit(p.Field[i]) && !isDisabled(p.Field[i]) {
 				isContinue, i = p.doEdit(i, cKey, rKey)
 				if isContinue {
-					//p.PreviousFocus = i
 					continue
 				}
 			}
@@ -2219,14 +2218,12 @@ func (p *Panel) read2(i int) (tcell.Key, string) {
 			if isListMode(p.Field[i]) {
 				isContinue, i = p.doList(i, cKey, rKey)
 				if isContinue {
-					//p.PreviousFocus = i
 					continue
 				}
 			}
 
 			if (isSelect(p.Field[i]) && cKey == tcell.KeyLeft) || cKey == tcell.KeyUp || cKey == tcell.KeyBacktab {
 				i = p.priorSelect(i, cKey)
-				//p.PreviousFocus = i
 				SetFocusedStyle(p.Field[i])
 				p.Field[i].resetDataPos(p.Field[i].hCursorX, p.Field[i].hCursorY)
 				p.Field[i].Say()
@@ -2234,7 +2231,6 @@ func (p *Panel) read2(i int) (tcell.Key, string) {
 
 			if (isSelect(p.Field[i]) && cKey == tcell.KeyRight) || cKey == tcell.KeyDown || cKey == tcell.KeyTab {
 				i = p.nextSelect(i, cKey)
-				//p.PreviousFocus = i
 				SetFocusedStyle(p.Field[i])
 				p.Field[i].resetDataPos(p.Field[i].hCursorX, p.Field[i].hCursorY)
 				p.Field[i].Say()
