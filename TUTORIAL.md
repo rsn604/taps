@@ -239,11 +239,12 @@ It is defined as a 7×6 select field by **Cols = 7 and Rows = 6**.
 : the display allows for increasing/decreasing the day, month, and year.
 The operations should be clear from the screen. You can increase or decrease the day, month, and year using the following operations.
 
+```
 Move the cursor and press "Enter."
 Direct key input ("d", "D", "T", "m", "M", "y", "Y")
 PF keys (F2 to F8)
 Mouse selection
-
+```
 ---
 ### (4) TestApp (examples/04_testapp/testapp.go)
  Finally, we present an application that combines the three programs discussed so far.
