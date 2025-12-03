@@ -358,17 +358,6 @@ func (p *Panel) setGridFieldStyle(i int) int {
 			for k := 0; k < len(gridFields); k++ {
 				xpos := GetFieldX(gridFields[k].X) + GetFieldX(p.StartX)
 				ypos := GetFieldY(gridFields[k].Y) + GetFieldY(p.StartY)
-				/*
-				   gridFieldLen := 0
-				if gridFields[k].FieldLen == 0 {
-					gridFieldLen = GetFieldX(p.EndX) - gridFields[k].X - GetFieldX(p.StartX)
-					if p.Rect {
-						gridFieldLen = gridFieldLen - 2
-					}
-				} else {
-					gridFieldLen = gridFields[k].FieldLen
-				}
-				*/
 				s0, s1 := getStyle(gridFields[k].Style, p.styleMatrix)
 				fieldRows := GetFieldY(gridFields[k].Rows)
 				if fieldRows == 0{
@@ -385,7 +374,6 @@ func (p *Panel) setGridFieldStyle(i int) int {
 					s.DataLen = gridFields[k].DataLen
 					s.Picture = gridFields[k].Picture
 					s.ExitKey = gridFields[k].ExitKey
-					//s.FieldLen = gridFieldLen
 					s.FieldLen = gridFields[k].FieldLen
 
 					s.X = xpos + (gridFieldLen + colSpaces)*col
@@ -460,7 +448,6 @@ func (p *Panel) setListFieldStyle(i int, s0 tcell.Style, s1 tcell.Style) int {
 		s.Rows = endy - j - 1
 
 		//@@@@
-		//s.X = xpos + fieldLen*k + p.Field[pos].ColSpaces*k
 		s.X = xpos + (fieldLen + p.Field[pos].ColSpaces)*k
 		s.Y = ypos + j
 
@@ -700,7 +687,6 @@ func (f *DataField) clearField() {
 	if GetFieldY(f.Y) > my || GetFieldX(f.X) >= mx {
 		return
 	}
-
 	x := 0
 	y := 0
 	for {
@@ -745,13 +731,6 @@ func (f *DataField) writeField() {
 		}
 
 		SetContent(x+GetFieldX(f.X), y, f.RData[i], nil, f.currentStyle)
-		/*
-			if i >= len(f.RData) {
-				SetContent(x+GetFieldX(f.X), y, ' ', nil, f.currentStyle)
-			} else {
-				SetContent(x+GetFieldX(f.X), y, f.RData[i], nil, f.currentStyle)
-			}
-		*/
 		x += runewidth.RuneWidth(f.RData[i])
 	}
 	Show()
@@ -814,10 +793,32 @@ func (p *Panel) additionalLines(f *DataField, ss string) int {
 	return lines
 }
 
-func (p *Panel) clearList(n string) {
+func (p *Panel) ClearGridData(n string) {
+	name := strings.Split(n, GRID_SEP)[0] + GRID_SEP
+	for _, f := range p.Field {
+		if strings.HasPrefix(f.Name, name){
+			p.Store("", f.Name)
+			//@@@@
+			f.clearField()
+			SetNormalStyle(f)
+		}
+	}
+}
+
+func (p *Panel) ClearGridList(n string) {
+	_, col, row := p.getLastGrid(n)
+	for j := 0; j <= row; j++ {
+		for i := 0; i <= col; i++ {
+			p.StoreGridList([]string{""}, n, i, j)
+		}
+	}
+}
+
+func (p *Panel) ClearList(n string) {
 	name := strings.Split(n, LIST_SEP)[0] + LIST_SEP
 	for _, f := range p.Field {
 		if strings.HasPrefix(f.Name, name) {
+			p.Store("", f.Name)
 			f.clearField()
 			SetNormalStyle(f)
 		}
@@ -841,7 +842,7 @@ func (p *Panel) SayListData(n string) {
 	dataPos := 0
 	listLen := p.getListLen(p.Field[pos].Name)
 
-	p.clearList(p.Field[pos].Name)
+	p.ClearList(p.Field[pos].Name)
 	//@@@@
 	if isDisabled(p.Field[pos]){
 		return
@@ -905,12 +906,10 @@ func (p *Panel) Say() {
 			i += next
 		} else {
 			if !isDisabled(p.Field[i]) {
-				//if mode  == CLEARLIST{
 				p.Field[i].hDataPos = 0
 				p.Field[i].hStartDataPos = 0
 				p.Field[i].hCursorX = 0
 				p.Field[i].hCursorY = 0
-				//}
 				p.Field[i].Say()
 			}
 			i++
@@ -1340,6 +1339,14 @@ func (p *Panel) GetFirstListName(name string) string {
 	return p.GetNthListName(name, 0)
 }
 
+func (p *Panel) GetNthGridName(name string, col, row int) string {
+	return strings.Split(name, GRID_SEP)[0] + GRID_SEP + fmt.Sprintf("%03d:%03d", col, row)
+}
+
+func (p *Panel) GetFirstGridName(name string) string {
+	return p.GetNthGridName(name, 0, 0)
+}
+
 func (p *Panel) getFirstList(name string) *DataField {
 	f := p.GetDataField(p.GetNthListName(name, 0))
 	return f
@@ -1360,6 +1367,24 @@ func (p *Panel) getLastList(n string) (string, int) {
 		}
 	}
 	return lastname, cnt
+}
+
+func (p *Panel) getLastGrid(n string) (string, int, int) {
+	name := strings.Split(n, GRID_SEP)[0] + GRID_SEP
+	lastname := ""
+	for i := len(p.Field) - 1; i >= 0; i-- {
+		if strings.HasPrefix(p.Field[i].Name, name) {
+			if !(isDisabled(p.Field[i])) {
+				//if lastname == "" {
+					lastname = p.Field[i].Name
+					break
+				//}
+			}
+		}
+	}
+	col, _ := strconv.Atoi(lastname[len(name):len(name)+3])
+	row, _ := strconv.Atoi(lastname[len(name)+3+1:len(name)+3+1+3])
+	return lastname, col, row
 }
 
 func (p *Panel) getListCountX(n string, isBreakName bool) (string, int) {
@@ -1609,14 +1634,11 @@ func (p *Panel) priorSelect(i int, cKey tcell.Key) int {
 			continue
 		}
 
-		//@@@@
-		//if isLabel(p.Field[hPriorSel]) && !(isListMode(p.Field[hPriorSel])) {
 		if isLabel(p.Field[hPriorSel]) {
 			hPriorSel--
 			continue
 		}
 
-		//if isEdit(p.Field[hPriorSel]) && !isDisabled(p.Field[hPriorSel]){
 		if isEdit(p.Field[hPriorSel]) {
 			SetNormalStyle(p.Field[hCurSel])
 			p.Field[hCurSel].Say()
@@ -1627,13 +1649,7 @@ func (p *Panel) priorSelect(i int, cKey tcell.Key) int {
 			hPriorSel--
 			continue
 		}
-		//@@@@
-		/*
-			if (cKey == tcell.KeyLeft) && (GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hPriorSel].Y)) {
-				hPriorSel--
-				continue
-			}
-		*/
+
 		if cKey == tcell.KeyLeft {
 			if GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hPriorSel].Y) {
 				if hSaveSel == hCurSel {
@@ -1702,34 +1718,21 @@ func (p *Panel) nextSelect(i int, cKey tcell.Key) int {
 			continue
 		}
 
-		//@@@@
-		//if isLabel(p.Field[hNextSel]) && !(isListMode(p.Field[hNextSel])) {
 		if isLabel(p.Field[hNextSel]) {
 			hNextSel++
 			continue
 		}
 
-		//if isEdit(p.Field[hNextSel]) && !isDisabled(p.Field[hNextSel]){
-		//@@@@
 		if isEdit(p.Field[hNextSel]) {
 			SetNormalStyle(p.Field[hCurSel])
 			p.Field[hCurSel].Say()
 			break
 		}
 
-		//@@@@@
 		if len(p.Field[hNextSel].RData) == 0 {
 			hNextSel++
 			continue
 		}
-
-		/*
-			if cKey == tcell.KeyRight && GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hNextSel].Y) {
-				hNextSel++
-				continue
-			}
-		*/
-		//@@@@
 
 		if cKey == tcell.KeyRight {
 			if GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hNextSel].Y) {
@@ -1997,8 +2000,7 @@ func (p *Panel) doList(i int, cKey tcell.Key, rKey rune) (bool, int) {
 		}
 	}
 
-	//if cKey == tcell.KeyDown || cKey == tcell.KeyEnter{
-	if cKey == tcell.KeyDown {
+ 	if cKey == tcell.KeyDown {
 		if p.Field[i].Name == lastListName && isSelect(p.Field[i]) {
 			if getListDataLen(p.Field[pos]) > p.Field[pos].listStart+cnt {
 				p.Field[pos].listStart++
@@ -2184,7 +2186,8 @@ func (p *Panel) read2(i int) (tcell.Key, string) {
 
 	i = p.locateField(i)
 	if i == INVALID_KEY {
-		return INVALID_KEY, ""
+		//return INVALID_KEY, ""
+		return tcell.KeyEscape, ""
 	}
 
 	for {
