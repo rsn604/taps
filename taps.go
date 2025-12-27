@@ -427,7 +427,7 @@ func (p *Panel) setListFieldStyle(i int, s0 tcell.Style, s1 tcell.Style) int {
 	} else {
 		fieldLen = p.Field[pos].FieldLen
 	}
-
+	colSpaces := p.Field[pos].ColSpaces
 	k := 0
 	j := 0
 	fnum := 0
@@ -447,8 +447,7 @@ func (p *Panel) setListFieldStyle(i int, s0 tcell.Style, s1 tcell.Style) int {
 		s.Name = name + LIST_SEP + fmt.Sprintf("%03d", fnum)
 		s.Rows = endy - j - 1
 
-		//@@@@
-		s.X = xpos + (fieldLen + p.Field[pos].ColSpaces)*k
+		s.X = xpos + (fieldLen +colSpaces)*k
 		s.Y = ypos + j
 
 		if j == 0 && k == 0 {
@@ -521,6 +520,7 @@ func (p *Panel) GetFieldStyle(style string) (tcell.Style, tcell.Style){
 
 func (p *Panel) ResetFieldStyle(n, style string){
 	s0, s1 := getStyle(style, p.styleMatrix)
+
 	for _, f := range p.Field {
 		if strings.HasPrefix(f.Name, n) {
 			f.currentStyle = s0
@@ -1581,6 +1581,7 @@ func getClickedField(sf []*DataField, e *tcell.EventMouse) (*DataField, int) {
 	return nil, -1
 }
 func checkExitKey(sf []*DataField, r rune) (*DataField, int) {
+	//@@@@
 	s := string(r)
 	var fsave *DataField
 	isave := -1
@@ -1639,7 +1640,9 @@ func (p *Panel) priorSelect(i int, cKey tcell.Key) int {
 			continue
 		}
 
-		if isEdit(p.Field[hPriorSel]) {
+		//####
+		//if isEdit(p.Field[hPriorSel]) {
+		if isEdit(p.Field[hPriorSel]) && cKey != tcell.KeyLeft{
 			SetNormalStyle(p.Field[hCurSel])
 			p.Field[hCurSel].Say()
 			break
@@ -1652,6 +1655,7 @@ func (p *Panel) priorSelect(i int, cKey tcell.Key) int {
 
 		if cKey == tcell.KeyLeft {
 			if GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hPriorSel].Y) {
+				//if GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hPriorSel].Y) && !isSelect(p.Field[hPriorSel]){
 				if hSaveSel == hCurSel {
 					hSaveSel = hPriorSel
 				}
@@ -1666,6 +1670,7 @@ func (p *Panel) priorSelect(i int, cKey tcell.Key) int {
 
 		if cKey == tcell.KeyUp {
 			if GetFieldY(p.Field[hCurSel].Y) <= GetFieldY(p.Field[hPriorSel].Y) {
+			//if GetFieldY(p.Field[hCurSel].Y) <= GetFieldY(p.Field[hPriorSel].Y) && !isSelect(p.Field[hPriorSel]) {
 				hPriorSel--
 				continue
 			}
@@ -1722,13 +1727,14 @@ func (p *Panel) nextSelect(i int, cKey tcell.Key) int {
 			hNextSel++
 			continue
 		}
-
-		if isEdit(p.Field[hNextSel]) {
+		//####
+		//if isEdit(p.Field[hNextSel]) {
+		if isEdit(p.Field[hNextSel]) && cKey != tcell.KeyRight {
 			SetNormalStyle(p.Field[hCurSel])
 			p.Field[hCurSel].Say()
 			break
 		}
-
+		
 		if len(p.Field[hNextSel].RData) == 0 {
 			hNextSel++
 			continue
@@ -1736,6 +1742,8 @@ func (p *Panel) nextSelect(i int, cKey tcell.Key) int {
 
 		if cKey == tcell.KeyRight {
 			if GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hNextSel].Y) {
+				//if GetFieldY(p.Field[hCurSel].Y) != GetFieldY(p.Field[hNextSel].Y) && !isSelect(p.Field[hNextSel]){
+				
 				if hSaveSel == hCurSel {
 					hSaveSel = hNextSel
 				}
