@@ -1811,8 +1811,10 @@ func (p *Panel) doEdit(i int, cKey tcell.Key, rKey rune) (bool, int) {
 	if cKey == tcell.KeyDelete || cKey == tcell.KeyCtrlD {
 		p.input_del(i)
 	}
+	// 2026/06/22
+	//if cKey == tcell.KeyBackspace2 || cKey == tcell.KeyCtrlH {
+	if cKey == tcell.KeyBS || cKey == tcell.KeyBackspace2 || cKey == tcell.KeyCtrlH {
 
-	if cKey == tcell.KeyBackspace2 || cKey == tcell.KeyCtrlH {
 		p.input_bs(i)
 	}
 
